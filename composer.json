@@ -2,5 +2,18 @@
     "name": "jlipps/paraunit",
     "require": {
         "php": ">=5.3.0"
-    }
+    },
+    "type": "library",
+    "description": "A parallel execution wrapper for PHPUnit",
+    "keywords": ["testing","PHPUnit"],
+    "homepage": "http://github.com/jlipps/paraunit",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jonathan Lipps",
+            "email": "jlipps@gmail.com",
+            "homepage": "http://jonathanlipps.com",
+            "role": "Developer"
+        }
+    ]
 }
