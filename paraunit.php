@@ -166,13 +166,14 @@ function startNewProcess(&$all_tests, &$active_procs, &$active_pipes, &$outputs)
 
 function getProcessForTest($test)
 {
+    global $PHPUNIT;
     $dspec = array(
         0 => array("pipe", "r"),
         1 => array("pipe", "w"),
         2 => array("pipe", "w"),
     );
     list($testName, $testFile) = $test;
-    $cmd = "phpunit --filter=$testName $testFile";
+    $cmd = "$PHPUNIT --filter=$testName $testFile";
     $process = proc_open($cmd,
         $dspec,
         $pipes,
@@ -183,20 +184,24 @@ function getProcessForTest($test)
     return array($process, $pipes);
 }
 
+$PHPUNIT = 'phpunit';
 
 function main($argv)
 {
-    $usage = "Usage: php paraunit.php -p[NUM_PROCESSES] --path=TEST_PATH/TEST_GLOB\n";
+    global $PHPUNIT;
+    $usage = "Usage: php paraunit.php -p[NUM_PROCESSES] --path=TEST_PATH/TEST_GLOB --phpunit=PATH/TO/PHPUNIT\n";
     if (!isset($argv[1]) || !$argv[1])
         die($usage);
 
-    $opts = getopt("p::", array('path:'));
+    $opts = getopt("p::", array('path:', 'phpunit::'));
     if (!isset($opts['path']))
         die($usage);
     if (isset($opts['p']) && intval($opts['p']) > 0)
         $processes = intval($opts['p']);
     else
         $processes = 1;
+    if (isset($opts['phpunit']))
+        $PHPUNIT = $opts['phpunit'];
 
     $files = getFiles($opts['path'], dirname(__FILE__));
 
