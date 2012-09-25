@@ -229,6 +229,12 @@ function main($argv)
         }
     }
 
+    if (!count($all_tests)) {
+        echo "Couldn't find any tests in the files paraunit collected. Here's what they were:\n\n";
+        print_r($files);
+        exit(1);
+    }
+
     runTestSets($all_tests, $processes);
 }
 
