@@ -230,7 +230,7 @@ function main($argv)
     }
 
     if (!count($all_tests)) {
-        echo "Couldn't find any tests in the files paraunit collected. Here's what they were:\n\n";
+        echo "Couldn't find any tests in the files paraunit collected. Here's the files we were looking in:\n\n";
         print_r($files);
         exit(1);
     }
