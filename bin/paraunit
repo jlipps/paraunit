@@ -201,10 +201,23 @@ function main($argv)
         $processes = intval($opts['p']);
     else
         $processes = 1;
-    if (isset($opts['phpunit']))
+    if (isset($opts['phpunit'])) {
         $PHPUNIT = $opts['phpunit'];
+        if ($PHPUNIT[0] != '/') {
+            $PHPUNIT = getcwd(). '/' . $PHPUNIT;
+        }
+    }
 
-    $files = getFiles($opts['path'], dirname(__FILE__));
+    if ($PHPUNIT != 'phpunit' && !is_file($PHPUNIT))
+        die("Couldn't find phpunit at '$PHPUNIT'\n");
+
+    //if ($opts['path'][0] != '/')
+        //$opts['path'] = getcwd().'/'.$opts['path'];
+
+    $files = getFiles($opts['path'], getcwd());
+
+    if (!count($files))
+        die("Couldn't find any tests with path '{$opts['path']}'\n");
 
     $all_tests = array();
     foreach($files as $file) {
