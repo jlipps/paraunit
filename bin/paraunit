@@ -185,7 +185,7 @@ function getProcessForTest($test)
     return array($process, $pipes);
 }
 
-$PHPUNIT = dirname(__FILE__).'/phpunit';
+$PHPUNIT = dirname(__FILE__).'/../../../bin/phpunit';
 
 function main($argv)
 {
