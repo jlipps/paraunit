@@ -1,8 +1,10 @@
 {
     "name": "jlipps/paraunit",
     "require": {
-        "php": ">=5.3.0"
+        "php": ">=5.3.0",
+        "phpunit/phpunit": "dev-master"
     },
+    "minimum-stability": "dev",
     "type": "library",
     "description": "A parallel execution wrapper for PHPUnit",
     "keywords": ["testing","PHPUnit"],
