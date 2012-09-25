@@ -190,7 +190,7 @@ $PHPUNIT = dirname(__FILE__).'/../../../bin/phpunit';
 function main($argv)
 {
     global $PHPUNIT;
-    $usage = "Usage: php paraunit.php -p[NUM_PROCESSES] --path=TEST_PATH/TEST_GLOB --phpunit=PATH/TO/PHPUNIT\n";
+    $usage = "Usage: paraunit -p[NUM_PROCESSES] --path=TEST_PATH/TEST_GLOB --phpunit=PATH/TO/PHPUNIT\n";
     if (!isset($argv[1]) || !$argv[1])
         die($usage);
 
@@ -210,6 +210,8 @@ function main($argv)
 
     if ($PHPUNIT != 'phpunit' && !is_file($PHPUNIT))
         die("Couldn't find phpunit at '$PHPUNIT'\n");
+
+    echo "Using phpunit at $PHPUNIT...\n";
 
     //if ($opts['path'][0] != '/')
         //$opts['path'] = getcwd().'/'.$opts['path'];

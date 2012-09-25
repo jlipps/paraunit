@@ -10,7 +10,10 @@ _tests must be logically independent!_
 
 Usage
 -----
-```php paraunit.php -p[PROCESSES] --PATH=TEST_PATH/TEST_GLOB```
+Install using composer. Then do this:
+
+```vendor/bin/paraunit -p[PROCESSES] --PATH=TEST_PATH/TEST_GLOB
+--PHPUNIT=PATH/TO/PHPUNIT```
 
 Todo
 ----
