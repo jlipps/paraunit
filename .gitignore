@@ -1,2 +1,5 @@
 *.swp
 *.un~
+vendor/
+composer.phar
+composer.lock
