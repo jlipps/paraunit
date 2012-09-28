@@ -190,14 +190,16 @@ $PHPUNIT = dirname(__FILE__).'/../../../bin/phpunit';
 function main($argv)
 {
     global $PHPUNIT;
-    $usage = "Usage: paraunit -p[NUM_PROCESSES] --path=TEST_PATH/TEST_GLOB --phpunit=PATH/TO/PHPUNIT\n";
+    $usage = "Usage: paraunit (-p[NUM_PROCESSES]|--processes=[NUM_PROCESSES]) --path=TEST_PATH/TEST_GLOB --phpunit=PATH/TO/PHPUNIT\n";
     if (!isset($argv[1]) || !$argv[1])
         die($usage);
 
-    $opts = getopt("p::", array('path:', 'phpunit::'));
+    $opts = getopt("p::", array('path:', 'phpunit::', 'processes::'));
     if (!isset($opts['path']))
         die($usage);
-    if (isset($opts['p']) && intval($opts['p']) > 0)
+    if (isset($opts['processes']) && intval($opts['processes']) > 0)
+        $processes = intval($opts['processes']);
+    elseif (isset($opts['p']) && intval($opts['p']) > 0)
         $processes = intval($opts['p']);
     else
         $processes = 1;
@@ -211,10 +213,7 @@ function main($argv)
     if ($PHPUNIT != 'phpunit' && !is_file($PHPUNIT))
         die("Couldn't find phpunit at '$PHPUNIT'\n");
 
-    echo "Using phpunit at $PHPUNIT...\n";
-
-    //if ($opts['path'][0] != '/')
-        //$opts['path'] = getcwd().'/'.$opts['path'];
+    echo "Using phpunit in $processes process(es) with $PHPUNIT\n";
 
     $files = getFiles($opts['path'], getcwd());
 

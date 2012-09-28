@@ -12,8 +12,8 @@ Usage
 -----
 Install using composer. Then do this:
 
-```vendor/bin/paraunit -p[PROCESSES] --PATH=TEST_PATH/TEST_GLOB
---PHPUNIT=PATH/TO/PHPUNIT```
+```vendor/bin/paraunit (-pPROCESSES|--processes=PROCESSES) --path=TEST_PATH/TEST_GLOB
+--phpunit=PATH/TO/PHPUNIT```
 
 Todo
 ----
