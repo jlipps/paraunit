@@ -43,6 +43,7 @@ function runTestSets($all_tests, $num_procs)
     $active_pipes = array();
     $n_tests = $n_assertions = $n_errors = 0;
     $errors = array();
+    $mismatch_outputs = array();
     $start_time = time();
     while (count($all_tests) || count($active_procs)) {
         if (count($active_pipes))
@@ -54,6 +55,8 @@ function runTestSets($all_tests, $num_procs)
             $n_errors += $stats[2];
             foreach($stats[3] as $error)
                 $errors[] = $error;
+            foreach($stats[4] as $output)
+                $mismatch_outputs[] = $output;
         }
         if (count($active_procs) < $num_procs && count($all_tests))
             startNewProcess($all_tests, $active_procs, $active_pipes, $outputs);
@@ -64,8 +67,17 @@ function runTestSets($all_tests, $num_procs)
         $num = $i+1;
         echo "$num) $error\n\n";
     }
+    if (count($mismatch_outputs)) {
+        echo "PHPUnit let us know there was an error or test failure, but we couldn't scrape it. Here's the entire output for the tests runs for which this is the case:\n";
+        foreach ($mismatch_outputs as $index => $output) {
+            $run_num = $index+1;
+            echo "========== Run $run_num ===========\n";
+            echo $output;
+            echo "=====================================\n\n";
+        }
+    }
     echo "Time: $n_secs seconds\n\n";
-    echo "Tests: $n_tests, Assertions: $n_assertions, Errors: $n_errors\n\n";
+    echo "Tests: $n_tests, Assertions: $n_assertions, Errors/Failures: $n_errors\n\n";
     if ($n_errors > 0) {
         exit(1);
     } else {
@@ -96,6 +108,7 @@ function collectStreamOutput($active_pipes, &$outputs)
 function updateProcessStatus(&$active_procs, &$active_pipes, $outputs)
 {
     $total_tests = $total_assertions = $total_errors = 0;
+    $mismatch_outputs = array();
     $errors = array();
     foreach ($active_procs as $id => $proc) {
         $status = proc_get_status($proc);
@@ -106,15 +119,19 @@ function updateProcessStatus(&$active_procs, &$active_pipes, $outputs)
             fclose($active_pipes[$id][2]);
             proc_close($proc);
             $stats = handleOutput($id, $outputs[$id]);
-            list($n_tests, $n_assertions, $n_errors, $errors) = $stats;
+            list($n_tests, $n_assertions, $n_errors, $errors, $was_mismatch,
+                $output) = $stats;
             unset($active_procs[$id]);
             unset($active_pipes[$id]);
             $total_tests += $n_tests;
             $total_assertions += $n_assertions;
             $total_errors = $n_errors;
+            if ($was_mismatch)
+                $mismatch_outputs[] = $output;
         }
     }
-    return array($total_tests, $total_assertions, $total_errors, $errors);
+    return array($total_tests, $total_assertions, $total_errors, $errors,
+        $mismatch_outputs);
 }
 
 function handleOutput($id, $output)
@@ -123,23 +140,38 @@ function handleOutput($id, $output)
     $errors = array();
     // first, find dots, Es, etc...
     preg_match("/^[\.FESI]+$/m", $output, $matches);
-    if (count($matches))
+    $short_results = array(
+        '.' => 0,
+        'F' => 0,
+        'E' => 0,
+        'S' => 0,
+        'I' => 0,
+    );
+    if (count($matches)) {
         echo $matches[0];
+        foreach (preg_split('//', $matches[0], -1, PREG_SPLIT_NO_EMPTY) as $char)
+            if (isset($short_results[$char]))
+                $short_results[$char]++;
+    }
 
-    preg_match("/^OK \(([0-9]+) tests?, ([0-9]+) assertions/m", $output, $matches);
+    preg_match("/^OK \(([0-9]+) tests?, ([0-9]+) assertions?/m", $output, $matches);
     if (count($matches) == 3) {
         $n_tests = intval($matches[1]);
         $n_assertions = intval($matches[2]);
+        if ($n_tests < $short_results['.'])
+            $n_tests = $short_results['.'];
     } else {
-        // echo "Could not find OK tests\n";
-        // print_r($matches);
+        //echo "Could not find OK tests\n";
+        //print_r($matches);
     }
 
-    preg_match("/^Tests: ([0-9]+), Assertions: ([0-9]+), Errors: ([0-9]+)/m", $output, $matches);
-    if (count($matches) == 4) {
+    preg_match("/^Tests: ([0-9]+), Assertions: ([0-9]+)(, Errors: ([0-9]+))?(, Failures: ([0-9]+))?/m", $output, $matches);
+    if (count($matches) == 7) {
         $n_tests += intval($matches[1]);
+        if ($n_tests < $short_results['.'])
+            $n_tests = $short_results['.'];
         $n_assertions += intval($matches[2]);
-        $n_errors += intval($matches[3]);
+        $n_errors += intval($matches[4]) + intval($matches[6]);
     } else {
         // echo "Could not find Failed tests\n";
         // print_r($matches);
@@ -154,10 +186,18 @@ function handleOutput($id, $output)
                 $errors[] = trim($error);
         }
     } else {
-        // echo "Could not find errors\n";
-        // print_r($matches);
+        //echo "Could not find errors\n";
+        //print_r($matches);
     }
-    return array($n_tests, $n_assertions, $n_errors, $errors);
+    $short_n_errors = $short_results['E'] + $short_results['F'];
+    if ($n_errors < $short_n_errors) {
+        $n_errors = $short_n_errors;
+        $was_mismatch = true;
+    } else {
+        $was_mismatch = false;
+    }
+    return array($n_tests, $n_assertions, $n_errors, $errors, $was_mismatch,
+        $output);
 }
 
 function startNewProcess(&$all_tests, &$active_procs, &$active_pipes, &$outputs)
