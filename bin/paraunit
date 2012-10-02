@@ -4,7 +4,8 @@
 function getFiles($glob, $base_dir)
 {
     $test_files = array();
-    $files = glob(joinPaths($base_dir, $glob), GLOB_MARK);
+    $real_glob = $glob[0] == "/" ? $glob : joinPaths($base_dir, $glob);
+    $files = glob($real_glob, GLOB_MARK);
     foreach ($files as $file) {
         if ($file != '.' && $file != '..') {
             if ($file[strlen($file)-1] === '/') {
