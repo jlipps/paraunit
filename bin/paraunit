@@ -65,6 +65,11 @@ function runTestSets($all_tests, $num_procs)
     }
     echo "Time: $n_secs seconds\n\n";
     echo "Tests: $n_tests, Assertions: $n_assertions, Errors: $n_errors\n\n";
+    if ($n_errors > 0) {
+        exit(1);
+    } else {
+        exit(0);
+    }
 }
 
 function collectStreamOutput($active_pipes, &$outputs)
@@ -186,6 +191,17 @@ function getProcessForTest($test)
 }
 
 $PHPUNIT = dirname(__FILE__).'/../../../bin/phpunit';
+$WIN_UNAMES = array(
+    'MINGW32_NT-6.0',
+    'UWIN-W7',
+    'WIN32',
+    'WINNT',
+    'Windows',
+    'Windows NT'
+);
+
+$IS_WIN = in_array(php_uname('s'), $WIN_UNAMES);
+
 
 function main($argv)
 {
