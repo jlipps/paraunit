@@ -72,8 +72,10 @@ function runTestSets($all_tests, $num_procs)
         foreach ($mismatch_outputs as $index => $output) {
             $run_num = $index+1;
             echo "========== Run $run_num ===========\n";
-            echo $output;
-            echo "=====================================\n\n";
+            echo $output."\n";
+            for ($i=0; $i < $run_num; $i++)
+                echo "=";
+            echo "===========================\n\n";
         }
     }
     echo "Time: $n_secs seconds\n\n";
